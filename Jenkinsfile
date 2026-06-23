@@ -3,6 +3,11 @@ pipeline {
 
     environment {
         APP_NAME = "multi-branch-app"
+        IMAGE_NAME = "multibranchapp"
+
+        PROD_PORT = "3000"
+        DEV_PORT = "3001"
+        TEST_PORT = "3002"
     }
 
     stages {
@@ -30,11 +35,19 @@ pipeline {
             }
         }
 
+        stage('Docker Build') {
+            steps {
+                echo "Building Docker Image for ${env.BRANCH_NAME}..."
+                sh "docker build -t ${env.IMAGE_NAME}:${env.BRANCH_NAME} ."
+            }
+        }
+
         // 3. AGAR TEST BRANCH HAI -> QA Environment Deployment
         stage('Deploy to QA (Test Branch)') {
             when { branch 'Test' }
             steps {
                 echo "🚀 Deploying ${env.APP_NAME} to QA Server..."
+                sh "docker run -d -p ${env.TEST_PORT}:${env.TEST_PORT} -e PORT=${env.TEST_PORT} -e BRANCH_NAME=${env.BRANCH_NAME} --name app-test-container ${env.IMAGE_NAME}:${env.BRANCH_NAME} 
                 // Example deployment commands:
                 // sh 'scp -r . user@qa-server:/var/www/app'
                 echo "Running QA Automation Sanity Tests..."
@@ -46,6 +59,7 @@ pipeline {
             when { branch 'develop' }
             steps {
                 echo "🚀 Deploying ${env.APP_NAME} to Staging Server..."
+                sh "docker run -d -p ${env.DEV_PORT}:${env.DEV_PORT} -e PORT=${env.DEV_PORT} -e BRANCH_NAME=${env.BRANCH_NAME} --name app-dev-container ${env.IMAGE_NAME}:${env.BRANCH_NAME}
                 // sh 'docker build -t myapp:staging . && docker run ...'
                 echo "Notifying QA team for UAT testing."
             }
@@ -56,6 +70,7 @@ pipeline {
             when { branch 'main' }
             steps {
                 echo "🚨 ALERT: Deploying ${env.APP_NAME} to LIVE PRODUCTION..."
+                sh "docker run -d -p ${env.PROD_PORT}:${env.PROD_PORT} -e PORT=${env.PROD_PORT} -e BRANCH_NAME=${env.BRANCH_NAME} --name app-prod-container ${env.IMAGE_NAME}:${env.BRANCH_NAME}
                 // sh './deploy_prod.sh'
                 echo "Deployment successfully live on production port 3000!"
             }
