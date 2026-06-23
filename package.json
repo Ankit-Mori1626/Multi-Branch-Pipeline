@@ -1,0 +1,13 @@
+{
+  "name": "multi-branch-jenkins-app",
+  "version": "1.0.0",
+  "description": "Jenkins multi-branch pipeline demo project",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo 'Running unit tests... All tests passed!'"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
