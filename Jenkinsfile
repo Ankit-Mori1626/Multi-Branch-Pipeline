@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent { label "Multibranch" }
 
     environment {
         APP_NAME = "multi-branch-app"
