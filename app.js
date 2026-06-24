@@ -10,6 +10,7 @@ app.get('/', (req, res) => {
         <h1>Welcome to My Multi-Branch App!</h1>
         <p>Current Active Branch: <strong>${BRANCH_NAME}</strong></p>
         <p>Status: Running smoothly.</p>
+        <p>Main Branch </p>
     `);
 });
 
