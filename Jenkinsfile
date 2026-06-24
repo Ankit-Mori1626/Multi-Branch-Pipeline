@@ -8,6 +8,8 @@ pipeline {
         PROD_PORT = "3000"
         DEV_PORT = "3001"
         TEST_PORT = "3002"
+
+        NOTIFY_EMAIL = "thesanketpawar@gmail.com, pixelprowler77@gmail.com"
     }
 
     stages {
@@ -80,14 +82,33 @@ pipeline {
         }
     }
     post {
-        always {
-            echo "Pipeline finished execution for branch: ${env.BRANCH_NAME}"
-        }
         success {
-            echo "✅ Build SUCCESS for branch ${env.BRANCH_NAME}."
+            emailext (
+                subject: "✅ SUCCESS: Job '${env.JOB_NAME}' [Build #${env.BUILD_NUMBER}]",
+                body: """<h3>Jenkins Build Successful!</h3>
+                         <p><b>Branch:</b> ${env.BRANCH_NAME}</p>
+                         <p><b>Build Number:</b> ${env.BUILD_NUMBER}</p>
+                         <p><b>Console Logs:</b> <a href='${env.BUILD_URL}'>Yahan Click Karein</a></p>
+                         <p>Status: Deployment complete ho gaya hai.</p>""",
+                to: "${env.NOTIFY_EMAIL}",
+                from: "ankitmori2323@gmail.com",
+                replyTo: "no-reply@yourdomain.com",
+                mimeType: 'text/html'
+            )
         }
+        
         failure {
-            echo "❌ Build FAILED for branch ${env.BRANCH_NAME}. Please check Git changes."
+            emailext (
+                subject: "❌ FAILED: Job '${env.JOB_NAME}' [Build #${env.BUILD_NUMBER}]",
+                body: """<h3>Jenkins Build FAILED!</h3>
+                         <p style='color:red;'><b>Branch:</b> ${env.BRANCH_NAME} par build fail ho gayi hai.</p>
+                         <p><b>Build Number:</b> ${env.BUILD_NUMBER}</p>
+                         <p><b>Check Error Logs Here:</b> <a href='${env.BUILD_URL}console'>Console Output</a></p>""",
+                to: "${env.NOTIFY_EMAIL}",
+                from: "ankitmori2323@gmail.com",
+                replyTo: "no-reply@yourdomain.com",
+                mimeType: 'text/html'
+            )
         }
     }
 }
