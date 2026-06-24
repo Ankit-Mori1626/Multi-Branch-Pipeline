@@ -40,7 +40,7 @@ pipeline {
         stage('Docker Build') {
             steps {
                 echo "Building Docker Image for ${env.BRANCH_NAME}..."
-                sh "docker build -t ${env.IMAGE_NAME}:${env.BRANCH_NAME} ."
+                sh "docker buildddd -t ${env.IMAGE_NAME}:${env.BRANCH_NAME} ."
             }
         }
 
