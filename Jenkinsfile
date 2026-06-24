@@ -110,5 +110,5 @@ pipeline {
                 mimeType: 'text/html'
             )
         }
+    }
 }
-
