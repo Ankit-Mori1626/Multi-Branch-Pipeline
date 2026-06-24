@@ -9,7 +9,7 @@ pipeline {
         DEV_PORT = "3001"
         TEST_PORT = "3002"
 
-        NOTIFY_EMAIL = "pixelprowler77@gmail.com, thesanketpawar@gmail.com"
+        NOTIFY_EMAIL = "ankitmori2323@gmail.com"
     }
 
     stages {
