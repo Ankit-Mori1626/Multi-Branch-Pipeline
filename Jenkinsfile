@@ -1,5 +1,5 @@
 pipeline {
-    agent none
+    { agent 'none' }
     environment {
         APP_NAME = "multi-branch-app"
         IMAGE_NAME = "multibranchapp"
