@@ -61,6 +61,7 @@ pipeline {
                 sh "docker rm -f app-dev-container || true"
                 sh "docker run -d -p ${env.DEV_PORT}:${env.DEV_PORT} -e PORT=${env.DEV_PORT} -e BRANCH_NAME=${env.BRANCH_NAME} --name app-dev-container ${env.IMAGE_NAME}:${env.BRANCH_NAME}"
                 echo "Notifying QA team for UAT testing."
+                echo "Dekhte hai"
             }
         }
 
