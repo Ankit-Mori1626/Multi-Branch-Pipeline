@@ -11,7 +11,7 @@ pipeline {
     stages {
         // 1. Checkout aur Changes Dikhana
         stage('Checkout & Show Changes') {
-            agent any
+            { agent 'any' }
             steps {
                 echo "=== Pulling code for branch: ${env.BRANCH_NAME} ==="
                 checkout scm
@@ -27,7 +27,7 @@ pipeline {
 
         // 2. Dependencies Install karna aur Testing (Sabhi branches ke liye)
         stage('Install & Test') {
-            agent any
+            { agent 'any' }
             steps {
                 echo "Installing packages and running tests..."
                 sh 'npm install'
@@ -36,7 +36,7 @@ pipeline {
         }
 
         stage('Docker Build') {
-            agent any
+            { agent 'any' }
             steps {
                 echo "Building Docker Image for ${env.BRANCH_NAME}..."
                 sh "docker build -t ${env.IMAGE_NAME}:${env.BRANCH_NAME} ."
