@@ -1,14 +1,10 @@
 pipeline {
-    agent { label "Multibranch" }
-
+    agent none
     environment {
         APP_NAME = "multi-branch-app"
         IMAGE_NAME = "multibranchapp"
-
         PROD_PORT = "3000"
         DEV_PORT = "3001"
-        TEST_PORT = "3002"
-
         NOTIFY_EMAIL = "ankitmori2323@gmail.com"
     }
 
@@ -40,26 +36,12 @@ pipeline {
         stage('Docker Build') {
             steps {
                 echo "Building Docker Image for ${env.BRANCH_NAME}..."
-                sh "docker buildddd -t ${env.IMAGE_NAME}:${env.BRANCH_NAME} ."
+                sh "docker build -t ${env.IMAGE_NAME}:${env.BRANCH_NAME} ."
             }
         }
-
-        // 3. AGAR TEST BRANCH HAI -> QA Environment Deployment
-        stage('Deploy to QA (Test Branch)') {
-            when { branch 'Test' }
-            steps {
-                echo "🚀 Deploying ${env.APP_NAME} to QA Server..."
-                sh "docker rm -f app-test-container || true"
-                sh "docker run -d -p ${env.TEST_PORT}:${env.TEST_PORT} -e PORT=${env.TEST_PORT} -e BRANCH_NAME=${env.BRANCH_NAME} --name app-test-container ${env.IMAGE_NAME}:${env.BRANCH_NAME}" 
-                // Example deployment commands:
-                // sh 'scp -r . user@qa-server:/var/www/app'
-                echo "Running QA Automation Sanity Tests..."
-            }
-        }
-
-        // 4. AGAR DEVELOP BRANCH HAI -> Staging Environment Deployment
         stage('Deploy to Staging (Develop Branch)') {
             when { branch 'develop' }
+            agent { label 'dev' }
             steps {
                 echo "🚀 Deploying ${env.APP_NAME} to Staging Server..."
                 sh "docker rm -f app-dev-container || true"
@@ -72,6 +54,7 @@ pipeline {
         // 5. AGAR MAIN BRANCH HAI -> Live Production Deployment
         stage('Deploy to Production (Main Branch)') {
             when { branch 'main' }
+            agent { label 'prod' }
             steps {
                 echo "🚨 ALERT: Deploying ${env.APP_NAME} to LIVE PRODUCTION..."
                 sh "docker rm -f app-prod-container || true"
