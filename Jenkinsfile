@@ -11,12 +11,14 @@ pipeline {
     stages {
         // 1. Checkout aur Changes Dikhana
         stage('Checkout & Show Changes') {
-            agent any
+            // FIX: Agar main branch hai toh 'prod' agent, nahi toh 'dev' agent use hoga
+            agent {
+                label (env.BRANCH_NAME == 'main' ? 'prod' : 'dev')
+            }
             steps {
                 echo "=== Pulling code for branch: ${env.BRANCH_NAME} ==="
                 checkout scm
                 
-                // Yeh command Jenkins console output me changes dikhayegi
                 echo "--- Latest Commit Details ---"
                 sh 'git log -1 --stat'
                 
@@ -25,9 +27,12 @@ pipeline {
             }
         }
 
-        // 2. Dependencies Install karna aur Testing (Sabhi branches ke liye)
+        // 2. Dependencies Install karna aur Testing
         stage('Install & Test') {
-            agent any
+            // FIX: Dynamic agent routing takki sahi environment tools milein
+            agent {
+                label (env.BRANCH_NAME == 'main' ? 'prod' : 'dev')
+            }
             steps {
                 echo "Installing packages and running tests..."
                 sh 'npm install'
@@ -35,13 +40,19 @@ pipeline {
             }
         }
 
+        // 3. Docker Build
         stage('Docker Build') {
-            agent any
+            // FIX: Taki docker image usi server par build ho jahan use deploy hona hai
+            agent {
+                label (env.BRANCH_NAME == 'main' ? 'prod' : 'dev')
+            }
             steps {
                 echo "Building Docker Image for ${env.BRANCH_NAME}..."
                 sh "docker build -t ${env.IMAGE_NAME}:${env.BRANCH_NAME} ."
             }
         }
+
+        // 4. Deploy to Staging (Develop Branch)
         stage('Deploy to Staging (Develop Branch)') {
             when { branch 'develop' }
             agent { label 'dev' }
@@ -49,12 +60,11 @@ pipeline {
                 echo "🚀 Deploying ${env.APP_NAME} to Staging Server..."
                 sh "docker rm -f app-dev-container || true"
                 sh "docker run -d -p ${env.DEV_PORT}:${env.DEV_PORT} -e PORT=${env.DEV_PORT} -e BRANCH_NAME=${env.BRANCH_NAME} --name app-dev-container ${env.IMAGE_NAME}:${env.BRANCH_NAME}"
-                // sh 'docker build -t myapp:staging . && docker run ...'
                 echo "Notifying QA team for UAT testing."
             }
         }
 
-        // 5. AGAR MAIN BRANCH HAI -> Live Production Deployment
+        // 5. Deploy to Production (Main Branch)
         stage('Deploy to Production (Main Branch)') {
             when { branch 'main' }
             agent { label 'prod' }
@@ -62,11 +72,11 @@ pipeline {
                 echo "🚨 ALERT: Deploying ${env.APP_NAME} to LIVE PRODUCTION..."
                 sh "docker rm -f app-prod-container || true"
                 sh "docker run -d -p ${env.PROD_PORT}:${env.PROD_PORT} -e PORT=${env.PROD_PORT} -e BRANCH_NAME=${env.BRANCH_NAME} --name app-prod-container ${env.IMAGE_NAME}:${env.BRANCH_NAME}"
-                // sh './deploy_prod.sh'
                 echo "Deployment successfully live on production port 3000!"
             }
         }
     }
+
     post {
         success {
             emailext (
