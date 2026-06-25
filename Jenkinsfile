@@ -2,7 +2,7 @@ pipeline{
   agent none
   environment { 
     PROD_PORT = "3000"
-    DEV_PORT = "3001:
+    DEV_PORT = "3001"
     IMAGE_NAME = "multiagent"
   }
 
