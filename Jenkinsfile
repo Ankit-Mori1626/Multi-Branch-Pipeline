@@ -36,7 +36,7 @@ pipeline{
       agent { label 'dev' }
       steps{
         sh "docker rm -f app-dev-container || true"
-        sh "docker run -d -p ${env.DEV_PORT}:${env.DEV_PORT} -e DEV_PORT=${env.DEV_PORT} -e BRANCH_NAME=${env.BRANCH_NAME} --name dev-container ${env.IMAGE_NAME}:${env.BRANCH_NAME}"
+        sh "docker run -d -p ${env.DEV_PORT}:${env.DEV_PORT} -e DEV_PORT=${env.DEV_PORT} -e BRANCH_NAME=${env.BRANCH_NAME} --name app-dev-container ${env.IMAGE_NAME}:${env.BRANCH_NAME}"
       }
     }
     stage('Deploy to prod'){
